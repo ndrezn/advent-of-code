@@ -52,10 +52,10 @@ Find the item type that appears in both compartments of each rucksack. What is t
 def get_solution(i):
     length = len(i)
 
-    compart_one = i[: length // 2]
-    compart_two = i[length // 2 :]
+    compart_one = set(i[: length // 2])
+    compart_two = set(i[length // 2 :])
 
-    shared_item = [i for i in compart_one if i in compart_two][0]
+    shared_item = list(compart_one.intersection(compart_two))[0]
 
     lower = shared_item.lower()
     index = ord(lower) - ord("a") + 1
@@ -67,11 +67,11 @@ def get_solution(i):
 
 f = open("03/example.txt", "r").readlines()
 score = sum(map(get_solution, f))
-print(score)
+assert score == 157
 
 f = open("03/input.txt", "r").readlines()
 score = sum(map(get_solution, f))
-print(score)
+print(f"Answer part 1: {score}")
 
 
 """
@@ -139,9 +139,9 @@ clean = lambda a: set(a.strip())
 f = convert_to_tuples(list(map(clean, open("03/example.txt", "r").readlines())))
 
 score = sum(map(get_second_solution, f))
-print(score)
+assert score == 70
 
 f = convert_to_tuples(list(map(clean, open("03/input.txt", "r").readlines())))
 
 score = sum(map(get_second_solution, f))
-print(score)
+print(f"Answer part 2: {score}")
