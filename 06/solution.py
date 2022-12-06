@@ -41,16 +41,14 @@ def read_characters(line: str, size: int) -> int:
     set of `size` unique chracters.
     """
     cur = []
-    index = -1
     for i, c in enumerate(line):
         if len(cur) == size:
             cur.pop(0)
         cur.append(c)
 
-        if len(set(cur)) == size and len(cur) == size:
-            index = i + 1
-            break
-    return index
+        if len(set(cur)) == len(cur) == size:
+            return i + 1
+    return -1
 
 
 sol = [read_characters(i, 4) for i in open("06/example.txt", "r").readlines()]
