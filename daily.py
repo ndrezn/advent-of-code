@@ -75,3 +75,4 @@ with open(f"./{day_name}/example.txt", "w") as fp:
 print(
     f"You can get your input by visiting (you must log in): https://adventofcode.com/2022/day/{day}/input"
 )
+print(f"Result can be submitted at: https://adventofcode.com/2022/day/{day}")
