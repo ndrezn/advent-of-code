@@ -1,3 +1,7 @@
+SPACE_REQUIRED = 30000000
+TOT_CAPACITY = 70000000
+
+
 class Directory:
     def __init__(self, name, parent):
         self.name = name
@@ -66,6 +70,7 @@ def update_filesystem(cwd: Directory, commands: list, incoming_item: str) -> Dir
 
         if commands:
             item = commands.pop(0)
+        # Once we've exhausted our commands we have a complete filesystem
         else:
             return cwd
 
@@ -106,26 +111,26 @@ print(f"The answer to question 1 is {sol}.")
 """
 
 
-def get_eligible_files(directory, ideal_size):
+def get_eligible_directories(directory, ideal_size):
     candidates = []
     for i in directory.children:
         if i.type == "directory":
             if i.get_size() > ideal_size:
                 candidates += [i.get_size()]
-            candidates += get_eligible_files(i, ideal_size)
+            candidates += get_eligible_directories(i, ideal_size)
     return candidates
 
 
 def get_ideal_size(fs):
-    return 30000000 - (70000000 - fs.get_size())
+    return SPACE_REQUIRED - (TOT_CAPACITY - fs.get_size())
 
 
 fs = get_fs("07/example.txt")
 ideal_size = get_ideal_size(fs)
-sol = min(get_eligible_files(fs, ideal_size))
+sol = min(get_eligible_directories(fs, ideal_size))
 assert sol == 24933642
 
 fs = get_fs("07/input.txt")
 ideal_size = get_ideal_size(fs)
-sol = min(get_eligible_files(fs, ideal_size))
+sol = min(get_eligible_directories(fs, ideal_size))
 print(f"The answer to question 2 is {sol}.")
