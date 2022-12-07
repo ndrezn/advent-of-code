@@ -125,11 +125,11 @@ class Directory:
     def get_root(self):
         if self.name == "/":
             return self
-        return self.parent
+        return self.parent.get_root()
 
 
 class File:
-    def __init__(self, name, size):
+    def __init__(self, name: str, size: int):
         self.name = name
         self.size = size
         self.type = "file"
@@ -138,36 +138,31 @@ class File:
         return str(self.size)
 
 
-def update_filesystem(cwd, commands, item):
-    if not commands:
-        return cwd
+def update_filesystem(cwd: Directory, commands: list, incoming_item: str) -> Directory:
+    item = commands.pop(0)
 
-    if ".." in item:
-        item = commands.pop(0)
+    if ".." in incoming_item:
         return update_filesystem(cwd.parent, commands, item)
-    elif "cd" in item:
-        new_cwd = item[5:].strip()
+    elif "cd" in incoming_item:
+        new_cwd = incoming_item.split()[2].strip()
         new_directory = cwd.get_child(new_cwd)
-        item = commands.pop(0)
         return update_filesystem(new_directory, commands, item)
 
     # Run an ls and save the results to our filesystem
     # Get the first item from the list
-    item = commands.pop(0)
     while not item.startswith("$"):
-        if item.startswith("dir"):
-            dir_name = item[4:].strip()
-            new_object = Directory(dir_name, cwd)
-        elif len(item.split()) == 2:
-            size, name = item.split()
-            new_object = File(name.strip(), int(size))
+        item = [i.strip() for i in item.split()]
+        if item[0] == "dir":
+            new_object = Directory(item[1], cwd)
+        else:
+            new_object = File(item[1], int(item[0]))
 
         cwd.add_child(new_object)
 
         if commands:
             item = commands.pop(0)
         else:
-            break
+            return cwd
 
     return update_filesystem(cwd, commands, item)
 
@@ -184,21 +179,21 @@ def sum_small_directories(directory):
 
 def get_fs(f):
     commands = open(f, "r").readlines()
-    root = Directory("/", None)
+    root_directory = Directory("/", None)
     commands.pop(0)
     item = commands.pop(0)
-    fs = update_filesystem(root, commands, item)
-    root = fs.get_root()
-    return root
+    node = update_filesystem(root_directory, commands, item)
+    fs = node.get_root()
+    return fs
 
 
-root = get_fs("07/example.txt")
-total_size = root.get_size()
+fs = get_fs("07/example.txt")
+total_size = fs.get_size()
 assert total_size == 48381165
-assert sum_small_directories(root) == 95437
+assert sum_small_directories(fs) == 95437
 
-root = get_fs("07/input.txt")
-sol = sum_small_directories(root)
+fs = get_fs("07/input.txt")
+sol = sum_small_directories(fs)
 print(f"The answer to question 1 is {sol}.")
 
 """
@@ -242,19 +237,16 @@ def get_eligible_files(directory, ideal_size):
     return candidates
 
 
-def get_ideal_size(root):
-    available_space = 70000000 - root.get_size()
-    space_required = 30000000
-    ideal_size = space_required - available_space
-    return ideal_size
+def get_ideal_size(fs):
+    return 30000000 - (70000000 - fs.get_size())
 
 
-root = get_fs("07/example.txt")
-ideal_size = get_ideal_size(root)
-sol = min(get_eligible_files(root, ideal_size))
+fs = get_fs("07/example.txt")
+ideal_size = get_ideal_size(fs)
+sol = min(get_eligible_files(fs, ideal_size))
 assert sol == 24933642
 
-root = get_fs("07/input.txt")
-ideal_size = get_ideal_size(root)
-sol = min(get_eligible_files(root, ideal_size))
+fs = get_fs("07/input.txt")
+ideal_size = get_ideal_size(fs)
+sol = min(get_eligible_files(fs, ideal_size))
 print(f"The answer to question 2 is {sol}.")
