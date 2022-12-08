@@ -39,53 +39,51 @@ Consider your map; how many trees are visible from outside the grid?
 import numpy as np
 
 
-def count_visible(row):
-    new_row = []
-    for i, t in enumerate(row):
-        height, is_visible, score = t
-        is_visible = is_visible == 1  # Type conversion back from numpy
-        leftmost = [-1] if i == 0 else [j[0] for j in row[0:i]]
-
-        if height > max(leftmost):
-            is_visible = True
-
-        # Ensure our border items have a score of 0
-        if leftmost[0] == -1:
-            score = 0
-
-        mult = 0
-        for i in reversed(leftmost):
-            mult += 1
-            if height < i or height == i:
-                break
-        if mult:
-            score *= mult
-        new_row.append((height, is_visible, score))
-
-    return new_row
+def count_visible(i, height, is_visible, score, row):
+    # [-1] represents tree on the edge, which has nothing to its left
+    l = [-1] if i == 0 else [j[0] for j in row[0:i]]
+    # tree is visible if it's taller than all the trees to its left
+    # otherwise convert the 1s from np back to booleans
+    is_visible = True if height > max(l) else is_visible == 1
+    # our enumerator represents the length of the sightline
+    for i, j in enumerate(reversed(l)):
+        if height < j or height == j:
+            break
+    # update our score; if it is an edge piece that means it has sightline of 0
+    # if it has a sightline multiply the existing score up a notch
+    score *= i + 1 if l != [-1] else 0
+    return (height, is_visible, score)
 
 
 def get_tree_metadata(f):
+    # pull in our forest from the file; convert to 2d array
     forest = [[(int(c), False, 1) for c in i.strip()] for i in open(f, "r").readlines()]
 
     for i in range(0, 4):
+        # we have a function looking to the left of each tree; rotate the array 4x and boom
+        # we get our full sightline info
         forest = np.rot90(np.array(forest)).tolist()
-        forest = list(map(count_visible, forest))
+        # lambda to apply our per-tree-left-looking-thingamabob to the array.
+        # there's probably a numpy builtin to do this... right? whatever
+        forest = list(
+            map(lambda i: [count_visible(j[0], *j[1], i) for j in enumerate(i)], forest)
+        )
     return forest
 
 
 def count_visible_trees(forest):
-    visible_trees = [j for i in forest for j in i if j[1] == 1]
+    # fetch all truthy trees. which means visible. count 'em
+    return len([j for i in forest for j in i if j[1] == 1])
 
-    return len(visible_trees)
 
+example_forest = get_tree_metadata("08/example.txt")
+input_forest = get_tree_metadata("08/input.txt")
 
-forest = get_tree_metadata("08/example.txt")
-sol = count_visible_trees(forest)
-assert sol == 21
-forest = get_tree_metadata("08/input.txt")
-sol = count_visible_trees(forest)
-print(f"The solution for question 1 is {sol}.")
+example_sol = count_visible_trees(example_forest)
+assert example_sol == 21
+
+input_sol = count_visible_trees(input_forest)
+print(f"The solution for question 1 is {input_sol}.")
 
 """
 --- Part Two ---
@@ -138,15 +136,11 @@ Consider each tree on your map. What is the highest scenic score possible for an
 
 
 def get_most_scenic(forest):
-    scores = [j[2] for i in forest for j in i]
-
-    return max(scores)
+    return max([j[2] for i in forest for j in i])
 
 
-forest = get_tree_metadata("08/example.txt")
-sol = get_most_scenic(forest)
-assert sol == 8
+example_sol = get_most_scenic(example_forest)
+assert example_sol == 8
 
-forest = get_tree_metadata("08/input.txt")
-sol = get_most_scenic(forest)
-print(f"The solution for question 2 is {sol}.")
+input_sol = get_most_scenic(input_forest)
+print(f"The solution for question 2 is {input_sol}.")
