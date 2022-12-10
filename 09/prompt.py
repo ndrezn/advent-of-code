@@ -429,7 +429,8 @@ H123..  (2 covers 4)
 .5....
 6.....  (6 covers 7, 8, 9, s)
 
-Now, you need to keep track of the positions the new tail, 9, visits. In this example, the tail never moves, and so it only visits 1 position. However, be careful: more types of motion are possible than before, so you might want to visually compare your simulated rope to the one above.
+Now, you need to keep track of the positions the new tail, 9, visits. In this example, the tail never moves, and so it only visits 1 position. 
+However, be careful: more types of motion are possible than before, so you might want to visually compare your simulated rope to the one above.
 
 Here's a larger example:
 

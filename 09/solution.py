@@ -6,74 +6,67 @@ def get_instructions(f):
     return instructions
 
 
-def move_tail(head_position, tail_position):
+def move_head(head, direction):
+    sign = {"R": [0, 1], "L": [0, -1], "U": [1, 1], "D": [1, -1]}
+    x_y, mult = sign[direction]
+    head[x_y] = head[x_y] + (1 * mult)
+    return head
+
+
+def move_tail(head, tail):
+    # I understand this can be simplified.
+    # Maybe for another time.
     for i in [0, 1]:
         j = abs(i - 1)
-        if head_position[i] - tail_position[i] == 2:
-            tail_position[j] = head_position[j]
-            tail_position[i] += 1
-        elif head_position[i] - tail_position[i] == -2:
-            tail_position[j] = head_position[j]
-            tail_position[i] -= 1
+        if tail[i] - head[i] == -2:
+            tail[i] += 1
+            if tail[j] > head[j]:
+                tail[j] -= 1
+            elif tail[j] < head[j]:
+                tail[j] += 1
 
-    return tail_position
-
-
-def update_position(visited, head_position, tail_position, instruction):
-    direction, count = instruction
-
-    x, y = head_position
-    if direction == "U":
-        new_x, new_y = x, y + count
-    if direction == "D":
-        new_x, new_y = x, y - count
-    if direction == "R":
-        new_x, new_y = x + count, y
-    if direction == "L":
-        new_x, new_y = x - count, y
-
-    step = -1 if direction in ["D", "L"] else 1
-
-    for i, n in enumerate([(x, new_x), (y, new_y)]):
-        for _ in range(*n, step):
-            head_position[i] += step
-            tail_position = move_tail(head_position, tail_position)
-
-            # Add a new row to our array
-            while len(visited) <= tail_position[1]:
-                row = [0 for _ in range(0, len(visited[0]))]
-                visited.append(row)
-            # Add a new column to our array
-            while len(visited[0]) <= tail_position[0]:
-                new_grid = []
-                for j in visited:
-                    new_grid.append([k for k in j] + [0])
-                visited = new_grid
-
-            visited[tail_position[1]][tail_position[0]] = 1
-
-    return visited, head_position, tail_position
+        elif tail[j] - head[j] == 2:
+            tail[j] -= 1
+            if tail[i] > head[i]:
+                tail[i] -= 1
+            elif tail[i] < head[i]:
+                tail[i] += 1
+    return tail
 
 
-def run(f):
-    instructions = get_instructions(f)
-    # Set our starting point as square 500,500 of the grid, so it's easier to back out if necessary
-    g = 100
-    visited, head_position, tail_position = [[0]], [g, g], [g, g]
-    while instructions:
-        visited, head_position, tail_position = update_position(
-            visited, head_position, tail_position, instructions.pop(0)
-        )
+def read_instructions(instructions, rope_size):
+    head = [0, 0]
+    rope = [[0, 0] for _ in range(0, rope_size)]
+    seen = {}
+    for direction, count in instructions:
+        for _ in range(count):
+            new_rope = []
+            head = move_head(head, direction)
+            prev = head
+            for knot in rope:
+                prev = move_tail(prev, knot)
+                new_rope.append(prev)
+            rope = new_rope
+            seen[str(prev)] = True  # Is this cheating? nahhhh
+    return len(seen)
 
-    count = 0
-    for i in visited:
-        for j in i:
-            count += j
-    return count
 
+i = get_instructions("09/example.txt")
+seen = read_instructions(i, 1)
+assert seen == 13
 
-sol = run("09/example.txt")
-assert sol == 13
+i = get_instructions("09/input.txt")
+seen = read_instructions(i, 1)
+print(f"The answer for problem 1 is {seen}.")
 
-sol = run("09/input.txt")
-print(sol)
+i = get_instructions("09/example.txt")
+seen = read_instructions(i, 9)
+assert seen == 1
+
+i = get_instructions("09/example_long.txt")
+seen = read_instructions(i, 9)
+assert seen == 36
+
+i = get_instructions("09/input.txt")
+seen = read_instructions(i, 9)
+print(f"The answer for problem 2 is {seen}.")
