@@ -201,50 +201,46 @@ signal strengths?
 
 
 def get_instructions(f):
-    def cleaner(i):
-        i = i.strip()
-        if i == "noop":
-            return ("noop", 0)
-        i = i.split()
-        return (i[0], int(i[1]))
-
-    instructions = [cleaner(i) for i in open(f, "r").readlines()]
+    instructions = [
+        (i.split()[0], int(i.split()[1])) if i.split()[0] != "noop" else ("noop", 0)
+        for i in open(f, "r").readlines()
+    ]
     return instructions
 
 
 def tick(counter, strengths):
-    strengths.append((counter, counter * len(strengths)))
-    return strengths
+    strengths.append(
+        (counter, counter * len(strengths))
+    )  # in place append so we can skip the return
 
 
 def clock(instructions):
     counter = 1
     # Cheating slightly by adding an extra initial tick. Off by one mess up somewhere in here.
     strengths = [(0, 1), (0, 1)]
-    while instructions:
-        cur = instructions.pop(0)
+    for cur in instructions:
         if cur[0] == "noop":
-            strengths = tick(counter, strengths)
+            tick(counter, strengths)
         else:
-            strengths = tick(counter, strengths)
+            tick(counter, strengths)
             counter += cur[1]
-            strengths = tick(counter, strengths)
+            tick(counter, strengths)
 
     return strengths
 
 
-def get_sol(ins):
+def get_signal(ins):
     strengths = clock(ins)
     sol = sum([strengths[20 + i * 40][1] for i in range(0, 6)])
     return sol
 
 
 ex_ins = get_instructions("10/example.txt")
-sol = get_sol(ex_ins)
+sol = get_signal(ex_ins)
 assert sol == 13140
 
 in_ins = get_instructions("10/input.txt")
-sol = get_sol(in_ins)
+sol = get_signal(in_ins)
 print(f"The answer to part 1 is {sol}.")
 
 
@@ -390,25 +386,20 @@ Render the image given by your program. What eight capital letters appear on you
 """
 
 
-def print_screen(ins):
-    strengths = clock(ins)[1:]
-    crt = ""
-
-    index = 0
-    for i in range(0, 6):
+def get_crt(ins):
+    strengths = clock(ins)[1:]  # fetch clock results
+    crt, i = "", 0  # init
+    for _ in range(0, 6):
         row = ""
-        for j in range(0, 40):
-            if strengths[index][0] - 1 <= j <= strengths[index][0] + 1:
-                row += "#"
-            else:
-                row += "."
-            index += 1
+        for _ in range(0, 40):
+            c = "#" if (strengths[i][0] - 1 <= i % 40 <= strengths[i][0] + 1) else "."
+            row += c
+            i += 1
         crt += row + "\n"
     return crt
 
 
-ex_ins = get_instructions("10/example.txt")
-crt = print_screen(ex_ins)
+crt = get_crt(ex_ins)
 sol = """
 ##..##..##..##..##..##..##..##..##..##..
 ###...###...###...###...###...###...###.
@@ -419,7 +410,6 @@ sol = """
 """
 assert crt.strip() == sol.strip()
 
-in_ins = get_instructions("10/input.txt")
-crt = print_screen(in_ins)
+crt = get_crt(in_ins)
 print("The answer to part 2 is...\n")
 print(crt)
