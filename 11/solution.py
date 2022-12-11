@@ -226,6 +226,7 @@ business after 20 rounds of stuff-slinging simian shenanigans?
 """
 import regex as re
 from functools import cache
+from math import lcm
 
 
 def get_ints(string):
@@ -237,37 +238,44 @@ def generate_monkey(blob):
     items = get_ints(i[1])
 
     ops = i[2].split("old")[1].split()
-    get_operator = lambda a: int(ops[1]) if len(ops) == 2 else a
+
+    def get_operator(a, ops):
+        return int(ops[1]) if len(ops) == 2 else a
 
     divisor = get_ints(i[3])[0]
     tosses = get_ints(i[4] + i[5])
 
     monkey = {
         "items": items,
-        "operation": lambda i: i * get_operator(i)
+        "operation": lambda i: i * get_operator(i, ops)
         if ops[0] == "*"
-        else i + get_operator(i),
+        else i + get_operator(i, ops),
         "behaviour": lambda i: tosses[0] if i % divisor == 0 else tosses[1],
         "inspected": 0,
+        "divisor": divisor,
     }
     return monkey
 
 
 def run_rounds(lines, count, worry_minimizer):
     monkeys = [generate_monkey(i) for i in lines]
+    modulus = lcm(*[i["divisor"] for i in monkeys])
 
     for _ in range(0, count):
         for i in range(0, len(monkeys)):
             while monkeys[i]["items"]:
-                monkeys[i]["inspected"] += 1
-                cur = monkeys[i]["items"].pop(0)
-                result = monkeys[i]["operation"](cur) // worry_minimizer
-                toss_to = monkeys[i]["behaviour"](result)
+                cur = monkeys[i]
+                cur["inspected"] += 1
+                item = cur["items"].pop(0)
+
+                # (a mod kn) mod n ≡ a mod n
+                # where our k is the multiple of all of the moduli from all problems
+                result = (cur["operation"](item) % modulus) // worry_minimizer
+                toss_to = cur["behaviour"](result)
                 monkeys[toss_to]["items"].append(result)
 
-    inspects = [i["inspected"] for i in monkeys]
     mult = 1
-    for monkey in sorted(inspects)[-2:]:
+    for monkey in sorted([i["inspected"] for i in monkeys])[-2:]:
         mult *= monkey
 
     return mult
@@ -378,10 +386,11 @@ Starting again from the initial state in your puzzle input, what is the level of
 
 """
 
+
 lines = open("11/example.txt", "r").read().strip().split("\n\n")
 monkey_business = run_rounds(lines, 10000, 1)
 assert monkey_business == 2713310158
 
 lines = open("11/input.txt", "r").read().strip().split("\n\n")
 monkey_business = run_rounds(lines, 10000, 1)
-print(f"The answer to part 1 is {monkey_business}.")
+print(f"The answer to part 2 is {monkey_business}.")
