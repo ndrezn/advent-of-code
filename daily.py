@@ -4,6 +4,7 @@ import sys
 
 import os
 
+YEAR = 2023
 try:
     day = int(sys.argv[1])
 except IndexError:
@@ -59,17 +60,18 @@ prompt = "\n".join([split_prompt(i) for i in prompt.split("\n")])
 prompt = f'"""\n{prompt}\n"""'
 
 day_name = str(day).zfill(2)
-os.makedirs(f"./{day_name}")
+if not os.path.exists(f"{YEAR}/{day_name}"):
+    os.makedirs(f"{YEAR}/{day_name}")
 
 # create a empty text file
-fp = open(f"./{day_name}/solution.py", "w")
+fp = open(f"{YEAR}/{day_name}/solution.py", "w")
 fp.write(prompt)
 fp.close()
 
-with open(f"./{day_name}/input.txt", "w") as fp:
+with open(f"{YEAR}/{day_name}/input.txt", "w") as fp:
     pass
 
-with open(f"./{day_name}/example.txt", "w") as fp:
+with open(f"{YEAR}/{day_name}/example.txt", "w") as fp:
     pass
 
 print(
