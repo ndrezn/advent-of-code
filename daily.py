@@ -11,7 +11,7 @@ except IndexError:
     print("Please provide a date as an integer.")
     sys.exit(1)
 
-website = requests.get(f"https://adventofcode.com/2022/day/{day}")
+website = requests.get(f"https://adventofcode.com/{YEAR}/day/{day}")
 
 footer = """To play, please identify yourself via one of these services:
 [GitHub] [Google] [Twitter] [Reddit] - [How Does Auth Work?]"""
@@ -75,6 +75,6 @@ with open(f"{YEAR}/{day_name}/example.txt", "w") as fp:
     pass
 
 print(
-    f"You can get your input by visiting (you must log in): https://adventofcode.com/2022/day/{day}/input"
+    f"You can get your input by visiting (you must log in): https://adventofcode.com/{YEAR}/day/{day}/input"
 )
-print(f"Result can be submitted at: https://adventofcode.com/2022/day/{day}")
+print(f"Result can be submitted at: https://adventofcode.com/{YEAR}/day/{day}")
