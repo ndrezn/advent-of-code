@@ -57,22 +57,25 @@ prompt = (
 
 prompt = "\n".join([split_prompt(i) for i in prompt.split("\n")])
 
-prompt = f'"""\n{prompt}\n"""'
-
 day_name = str(day).zfill(2)
-if not os.path.exists(f"{YEAR}/{day_name}"):
-    os.makedirs(f"{YEAR}/{day_name}")
+if not os.path.exists(f"{YEAR}"):
+    os.makedirs(f"{YEAR}")
+if not os.path.exists(f"{YEAR}/inputs"):
+    os.makedirs(f"{YEAR}/inputs")
+if not os.path.exists(f"{YEAR}/examples"):
+    os.makedirs(f"{YEAR}/examples")
+if not os.path.exists(f"{YEAR}/prompts"):
+    os.makedirs(f"{YEAR}/prompts")
 
-# create a empty text file
-fp = open(f"{YEAR}/{day_name}/solution.py", "w")
-fp.write(prompt)
-fp.close()
+files = [f"{YEAR}/inputs/{day_name}.txt", f"{YEAR}/examples/{day_name}.txt", f"{YEAR}/day{day_name}.rs"]
 
-with open(f"{YEAR}/{day_name}/input.txt", "w") as fp:
-    pass
+for f in files:
+    with open(f, 'w') as fp:
+        pass
 
-with open(f"{YEAR}/{day_name}/example.txt", "w") as fp:
-    pass
+with open(f"{YEAR}/prompts/{day_name}.txt", "w") as fp:
+    fp.write(prompt)
+
 
 print(
     f"You can get your input by visiting (you must log in): https://adventofcode.com/{YEAR}/day/{day}/input"

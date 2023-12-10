@@ -1,6 +1,39 @@
 .DS_Store
 *.rdb
-*/input.txt
+input.txt
+solution
+
+inputs/
+prompts/
+
+
+# Compiled files and temporary build artifacts
+*.o
+*.rlib
+*.rmeta
+*.a
+*.rlib
+*.rmeta
+*.d
+*.pdb
+*.exe
+*.out
+*.prof
+*.rlib
+*.rmeta
+*.rmeta.json
+*.rmeta.cratebin
+*.so
+*.dylib
+*.dll
+*.rlibdeps
+*.dSYM/
+*.rustc_info.json
+
+# Crates.io and Rust standard library files
+.crates.toml
+.rustc/
+.rustup/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
